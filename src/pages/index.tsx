@@ -1,193 +1,114 @@
 import * as React from "react"
 import type { HeadFC, PageProps } from "gatsby"
+import { GlobalStyle } from "../styled-components/global"
+import { ThemeProvider } from "styled-components"
+import { colors } from "../styled-components/colors"
+import Nav from "../components/nav"
+import Content from "../components/content"
+import Landing from "../components/landing"
+import Footer from "../components/footer"
+import gsap from "gsap"
+import ScrollTrigger from "gsap/ScrollTrigger"
+import DevIcons from "../components/devIcons"
+import WorkCarousel from "../components/workCarousel"
+import { useGSAP } from "@gsap/react"
+import { useEffect } from "react"
 
-const pageStyles = {
-  color: "#232129",
-  padding: 96,
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
-}
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-const headingAccentStyles = {
-  color: "#663399",
-}
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
-const listStyles = {
-  marginBottom: 96,
-  paddingLeft: 0,
-}
-const doclistStyles = {
-  paddingLeft: 0,
-}
-const listItemStyles = {
-  fontWeight: 300,
-  fontSize: 24,
-  maxWidth: 560,
-  marginBottom: 30,
-}
-
-const linkStyle = {
-  color: "#8954A8",
-  fontWeight: "bold",
-  fontSize: 16,
-  verticalAlign: "5%",
-}
-
-const docLinkStyle = {
-  ...linkStyle,
-  listStyleType: "none",
-  display: `inline-block`,
-  marginBottom: 24,
-  marginRight: 12,
-}
-
-const descriptionStyle = {
-  color: "#232129",
-  fontSize: 14,
-  marginTop: 10,
-  marginBottom: 0,
-  lineHeight: 1.25,
-}
-
-const docLinks = [
-  {
-    text: "TypeScript Documentation",
-    url: "https://www.gatsbyjs.com/docs/how-to/custom-configuration/typescript/",
-    color: "#8954A8",
+const content = [
+  {   
+    flip: false,
+    hash: "me",
+    header: "me.",
+    content: <DevIcons/>,
+    body: "I craft dynamic, high-performance web experiences that captivate users and elevate brands. As a front-end developer skilled in React, jQuery, SASS, Node.js, and Adobe Experience Manager, I blend creativity, technical expertise, and attention to detail to deliver exceptional digital experiences. Ready to build something extraordinary?"
   },
   {
-    text: "GraphQL Typegen Documentation",
-    url: "https://www.gatsbyjs.com/docs/how-to/local-development/graphql-typegen/",
-    color: "#8954A8",
+    flip: true,
+    hash: "work",
+    header: "work.",
+    content: <WorkCarousel/>,
+    body: ""
+  },
+  {
+    flip: false,
+    hash: "contact",
+    header: "contact.",
+    content: <Footer/>,
+    body: "I'm always excited to connect with fellow developers, designers, and potential collaborators. Whether you have a project in mind, want to discuss the latest trends in web development, or just want to say hello, feel free to reach out! You can contact me via email or LinkedIn down below. 👇"
   }
 ]
 
-const badgeStyle = {
-  color: "#fff",
-  backgroundColor: "#088413",
-  border: "1px solid #088413",
-  fontSize: 11,
-  fontWeight: "bold",
-  letterSpacing: 1,
-  borderRadius: 4,
-  padding: "4px 6px",
-  display: "inline-block",
-  position: "relative" as "relative",
-  top: -2,
-  marginLeft: 10,
-  lineHeight: 1,
+const Homepage: React.FC<PageProps> = () => {
+    gsap.registerPlugin(ScrollTrigger)
+    useGSAP(() => {
+
+        let panels: gsap.DOMTarget[] = gsap.utils.toArray(".panel");
+        // we'll create a ScrollTrigger for each panel just to track when each panel's top hits the top of the viewport (we only need this for snapping)
+        let tops = panels.map(panel => ScrollTrigger.create({trigger: panel, start: "top top"}));
+        
+        panels.forEach((panel: any, i) => {
+          if (i < panels.length-2) {
+            let tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: panel,
+                start: 'top top',
+                scrub: true,
+                markers: true
+              } 
+            });
+  
+            tl.to(panel.querySelectorAll('div:not(.arrow)'), { opacity: 0.1 });
+          }
+          
+          ScrollTrigger.create({
+            trigger: panel,
+            start: () => panel.offsetHeight < window.innerHeight ? "top top" : "bottom bottom", // if it's shorter than the viewport, we prefer to pin it at the top
+            pin: true, 
+            pinSpacing: false,
+            });
+        });
+        
+        ScrollTrigger.create({
+          snap: {
+            snapTo: (progress, self: any) => {
+              let panelStarts = tops.map(st => st.start), // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
+                  snapScroll = gsap.utils.snap(panelStarts, self.scroll(), ); // find the closest one
+              return gsap.utils.normalize(0, ScrollTrigger.maxScroll(window), snapScroll); // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
+            },
+            duration: 0.5
+          }
+
+        });
+
+    })
+
+    useEffect(() => {
+        const handleScroll = () => {
+          const nav = document.querySelector('.nav') as HTMLElement;
+          if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
+        }
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    return (
+        <ThemeProvider theme={colors}>
+        <main>
+            <GlobalStyle/>
+            <Nav/>
+            <Landing/>
+            {content.map(content => (
+                <Content key={content.header} flip={content.flip} hash={content.hash} header={content.header} body={content.body} content={content.content} className="panel"/>
+            ))}
+        </main>
+        </ThemeProvider>
+    )
 }
+export default Homepage
 
-const links = [
-  {
-    text: "Tutorial",
-    url: "https://www.gatsbyjs.com/docs/tutorial/getting-started/",
-    description:
-      "A great place to get started if you're new to web development. Designed to guide you through setting up your first Gatsby site.",
-    color: "#E95800",
-  },
-  {
-    text: "How to Guides",
-    url: "https://www.gatsbyjs.com/docs/how-to/",
-    description:
-      "Practical step-by-step guides to help you achieve a specific goal. Most useful when you're trying to get something done.",
-    color: "#1099A8",
-  },
-  {
-    text: "Reference Guides",
-    url: "https://www.gatsbyjs.com/docs/reference/",
-    description:
-      "Nitty-gritty technical descriptions of how Gatsby works. Most useful when you need detailed information about Gatsby's APIs.",
-    color: "#BC027F",
-  },
-  {
-    text: "Conceptual Guides",
-    url: "https://www.gatsbyjs.com/docs/conceptual/",
-    description:
-      "Big-picture explanations of higher-level Gatsby concepts. Most useful for building understanding of a particular topic.",
-    color: "#0D96F2",
-  },
-  {
-    text: "Plugin Library",
-    url: "https://www.gatsbyjs.com/plugins",
-    description:
-      "Add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
-    color: "#8EB814",
-  },
-  {
-    text: "Build and Host",
-    url: "https://www.gatsbyjs.com/cloud",
-    badge: true,
-    description:
-      "Now you’re ready to show the world! Give your Gatsby site superpowers: Build and host on Gatsby Cloud. Get started for free!",
-    color: "#663399",
-  },
-]
-
-const IndexPage: React.FC<PageProps> = () => {
-  return (
-    <main style={pageStyles}>
-      <h1 style={headingStyles}>
-        Congratulations
-        <br />
-        <span style={headingAccentStyles}>— you just made a Gatsby site! 🎉🎉🎉</span>
-      </h1>
-      <p style={paragraphStyles}>
-        Edit <code style={codeStyles}>src/pages/index.tsx</code> to see this page
-        update in real-time. 😎
-      </p>
-      <ul style={doclistStyles}>
-        {docLinks.map(doc => (
-          <li key={doc.url} style={docLinkStyle}>
-            <a
-              style={linkStyle}
-              href={`${doc.url}?utm_source=starter&utm_medium=ts-docs&utm_campaign=minimal-starter-ts`}
-            >
-              {doc.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-      <ul style={listStyles}>
-        {links.map(link => (
-          <li key={link.url} style={{ ...listItemStyles, color: link.color }}>
-            <span>
-              <a
-                style={linkStyle}
-                href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter-ts`}
-              >
-                {link.text}
-              </a>
-              {link.badge && (
-                <span style={badgeStyle} aria-label="New Badge">
-                  NEW!
-                </span>
-              )}
-              <p style={descriptionStyle}>{link.description}</p>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <img
-        alt="Gatsby G Logo"
-        src="data:image/svg+xml,%3Csvg width='24' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2a10 10 0 110 20 10 10 0 010-20zm0 2c-3.73 0-6.86 2.55-7.75 6L14 19.75c3.45-.89 6-4.02 6-7.75h-5.25v1.5h3.45a6.37 6.37 0 01-3.89 4.44L6.06 9.69C7 7.31 9.3 5.63 12 5.63c2.13 0 4 1.04 5.18 2.65l1.23-1.06A7.959 7.959 0 0012 4zm-8 8a8 8 0 008 8c.04 0 .09 0-8-8z' fill='%23639'/%3E%3C/svg%3E"
-      />
-    </main>
-  )
-}
-
-export default IndexPage
-
-export const Head: HeadFC = () => <title>Home Page</title>
+export const Head: HeadFC = () => <title>ajsantos | Front-end Developer</title>
