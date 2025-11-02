@@ -67,6 +67,14 @@ const Landing: React.FC = () => {
 		});
 	}, {});
 
+	useEffect(() => {
+		let arrow = document.querySelector('.arrow');
+		let section = document.querySelector('.panel--me');
+		arrow?.addEventListener('click', () => {
+			section?.scrollIntoView({ behavior: 'smooth' });
+		});
+	}, []);
+
 	return (
 		<StyledLanding className="panel panel--landing">
 			<StyledImage className="photo">
