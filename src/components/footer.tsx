@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
 				trigger: '.footer',
 				start: 'top top',
 				scrub: true,
-				markers: true
+				//markers: true
 			}
 		});
 

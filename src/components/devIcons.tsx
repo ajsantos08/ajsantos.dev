@@ -91,7 +91,7 @@ const DevIcons: React.FC = () => {
 				scrollTrigger: {
 					trigger: container.current,
 					start: 'top bottom',
-					markers: true,
+					//markers: true,
 					scrub: false
 				}
 			});

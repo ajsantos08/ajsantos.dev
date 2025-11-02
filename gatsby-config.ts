@@ -2,13 +2,24 @@ import type { GatsbyConfig } from "gatsby"
 
 const config: GatsbyConfig = {
   siteMetadata: {
-    siteUrl: `https://www.yourdomain.tld`,
+    siteUrl: `https://www.ajsantos.dev`,
+    title: "ajsantos.dev",
+    description: "Arthur Santos",
   },
   // More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
   // If you use VSCode you can also use the GraphQL plugin
   // Learn more at: https://gatsby.dev/graphql-typegen
   graphqlTypegen: true,
-  plugins: [],
+  plugins: [ {
+   resolve: `gatsby-plugin-manifest`,
+   options: {
+     name: `ajsantos.dev`,
+     short_name: `ajsantos.dev`,
+     start_url: `/`,
+     display: `standalone`,
+     icon: `/src/images/favicon/favicon.ico`, 
+   },
+ },],
 }
 
 export default config

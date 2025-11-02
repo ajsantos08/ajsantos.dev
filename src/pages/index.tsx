@@ -53,7 +53,7 @@ const Homepage: React.FC<PageProps> = () => {
                 trigger: panel,
                 start: 'top top',
                 scrub: true,
-                markers: true
+                //markers: true
               } 
             });
   
